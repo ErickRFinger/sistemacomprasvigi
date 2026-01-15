@@ -8,18 +8,18 @@ export default {
     extend: {
       colors: {
         royal: {
-          DEFAULT: '#4169E1',
-          dark: '#27408B', // Darker Royal Blue
-          darker: '#102A43',
-          background: '#D4E2F7', // Lighter blue for background "not too light"
+          DEFAULT: '#1E3A8A', // Deep blue
+          dark: '#172554', // Very dark blue (almost black)
+          surface: '#1e293b', // Dark blue-grey for cards
+          text: '#e2e8f0', // Light grey for text
         },
         orange: {
-          DEFAULT: '#FF8C00', // Dark Orange
-          dark: '#E65100', // Darker
+          DEFAULT: '#F97316',
+          dark: '#EA580C',
         },
         whatsapp: {
           DEFAULT: '#25D366',
-          dark: '#128C7E',
+          hover: '#128C7E',
         }
       }
     },
