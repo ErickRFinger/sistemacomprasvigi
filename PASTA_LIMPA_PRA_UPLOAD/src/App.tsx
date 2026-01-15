@@ -23,7 +23,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-royal-background font-sans">
       {/* Header */}
       <header className="bg-royal-dark text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -108,10 +108,10 @@ function App() {
                 <div className="mt-6 pt-4 border-t border-gray-100">
                   <button
                     onClick={() => handleWhatsApp(supplier.phone, supplier.product)}
-                    className="w-full flex items-center justify-center gap-2 bg-orange-DEFAULT hover:bg-orange-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm hover:shadow active:scale-95 duration-200"
+                    className="w-full flex items-center justify-center gap-2 bg-whatsapp-DEFAULT hover:bg-whatsapp-dark text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm hover:shadow active:scale-95 duration-200"
                   >
                     <Phone className="w-5 h-5" />
-                    Fazer Pedido
+                    Chamar no WhatsApp
                   </button>
                 </div>
               </div>
