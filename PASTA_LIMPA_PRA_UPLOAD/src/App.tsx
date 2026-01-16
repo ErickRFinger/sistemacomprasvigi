@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { suppliers } from './data/suppliers';
+import { suppliers, Supplier } from './data/suppliers';
 import { Phone, MapPin, Package, Search, Building2, ShoppingCart } from 'lucide-react';
+import { OrderModal } from './components/OrderModal';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
   // Extract unique cities for filter
   const cities = ['all', ...new Set(suppliers.map(s => s.city))];
@@ -17,9 +19,8 @@ function App() {
     return matchesSearch && matchesCity;
   });
 
-  const handleWhatsApp = (phone: string, product: string) => {
-    const message = `Olá, gostaria de fazer um pedido de ${product}.`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  const handleOrderClick = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
   };
 
   return (
@@ -107,11 +108,11 @@ function App() {
 
                 <div className="mt-6 pt-4 border-t border-white/5">
                   <button
-                    onClick={() => handleWhatsApp(supplier.phone, supplier.product)}
+                    onClick={() => handleOrderClick(supplier)}
                     className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95 duration-200"
                   >
                     <Phone className="w-5 h-5" />
-                    Chamar no WhatsApp
+                    Fazer Pedido
                   </button>
                 </div>
               </div>
@@ -130,6 +131,14 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Order Modal */}
+      {selectedSupplier && (
+        <OrderModal
+          supplier={selectedSupplier}
+          onClose={() => setSelectedSupplier(null)}
+        />
+      )}
     </div>
   );
 }
