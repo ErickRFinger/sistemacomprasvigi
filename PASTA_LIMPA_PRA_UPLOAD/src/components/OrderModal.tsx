@@ -31,6 +31,8 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
         });
     };
 
+    const [observation, setObservation] = useState('');
+
     const handleSendOrder = () => {
         // Filter items with quantity > 0
         const items = Object.entries(quantities)
@@ -39,7 +41,13 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
 
         if (items.length === 0) return;
 
-        const message = `*Olá, ${supplier.name}! Gostaria de fazer um pedido:*\n\n${items.join('\n')}\n\n*Aguardo confirmação.*`;
+        let message = `*Olá, ${supplier.name}! Gostaria de fazer um pedido:*\n\n${items.join('\n')}`;
+
+        if (observation.trim()) {
+            message += `\n\n*Observações:*\n${observation}`;
+        }
+
+        message += `\n\n*Aguardo confirmação.*`;
 
         window.open(`https://wa.me/${supplier.phone}?text=${encodeURIComponent(message)}`, '_blank');
         onClose();
@@ -110,18 +118,27 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-white/10 bg-slate-950 flex justify-between items-center">
-                    <div className="text-sm text-slate-400">
-                        {Object.keys(quantities).filter(k => quantities[k] > 0).length} itens selecionados
+                <div className="p-6 border-t border-white/10 bg-slate-950 flex flex-col gap-4">
+                    <textarea
+                        placeholder="Observações (opcional)... Ex: Entregar na parte da tarde"
+                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-slate-300 placeholder-slate-500 focus:ring-1 focus:ring-royal-DEFAULT focus:outline-none resize-none h-20 text-sm"
+                        value={observation}
+                        onChange={(e) => setObservation(e.target.value)}
+                    />
+
+                    <div className="flex justify-between items-center">
+                        <div className="text-sm text-slate-400">
+                            {Object.keys(quantities).filter(k => quantities[k] > 0).length} itens selecionados
+                        </div>
+                        <button
+                            onClick={handleSendOrder}
+                            disabled={Object.values(quantities).every(q => q === 0)}
+                            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95"
+                        >
+                            <Send className="w-5 h-5" />
+                            Enviar Pedido no WhatsApp
+                        </button>
                     </div>
-                    <button
-                        onClick={handleSendOrder}
-                        disabled={Object.values(quantities).every(q => q === 0)}
-                        className="flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95"
-                    >
-                        <Send className="w-5 h-5" />
-                        Enviar Pedido no WhatsApp
-                    </button>
                 </div>
 
             </div>

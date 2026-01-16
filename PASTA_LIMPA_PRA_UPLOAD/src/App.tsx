@@ -1,28 +1,41 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Supplier } from './data/suppliers';
-import { Phone, MapPin, Package, Search, Building2, ShoppingCart } from 'lucide-react';
+import { Phone, MapPin, Package, Search, Building2, Heart } from 'lucide-react';
 import { OrderModal } from './components/OrderModal';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0meRkTnIesDrj_y2PSGZ5-sn0LZmo6s3MDaEB6zRtH8KS-jZkXeekWsJmIOxaRyy2Pvt-jpgfohIe/pub?output=csv";
 
   useEffect(() => {
+    // 1. Load Favorites from LocalStorage
+    const savedFavs = localStorage.getItem('vigi_favs');
+    if (savedFavs) {
+      setFavorites(JSON.parse(savedFavs));
+    }
+
+    // 2. Load Cache (Instant Load)
+    const cachedData = localStorage.getItem('vigi_cache');
+    if (cachedData) {
+      setSuppliers(JSON.parse(cachedData));
+      setLoading(false); // Show content immediately
+    }
+
+    // 3. Fetch Fresh Data (Background Update)
     fetch(SHEET_URL)
       .then(response => response.text())
       .then(csvText => {
         const lines = csvText.split('\n');
-        // Remove header and empty lines
         const dataRows = lines.slice(1).filter(line => line.trim() !== '');
 
         const parsedSuppliers: Supplier[] = dataRows.map((line, index) => {
-          // Simple CSV split by comma (assuming no commas in values for now, or simple split)
-          // A better regex for CSV with quotes support: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
           const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.trim().replace(/^"|"$/g, ''));
 
           // Expected columns: NOME, TELEFONE, CIDADE, REGIAO, CATEGORIA, PRODUTOS
@@ -43,7 +56,10 @@ function App() {
             products: productList
           };
         });
+
+        // Update State & Cache
         setSuppliers(parsedSuppliers);
+        localStorage.setItem('vigi_cache', JSON.stringify(parsedSuppliers));
         setLoading(false);
       })
       .catch(error => {
@@ -52,15 +68,37 @@ function App() {
       });
   }, []);
 
-  // Extract unique cities for filter
+  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavorites(prev => {
+      const newFavs = prev.includes(id)
+        ? prev.filter(favId => favId !== id)
+        : [...prev, id];
+
+      localStorage.setItem('vigi_favs', JSON.stringify(newFavs));
+      return newFavs;
+    });
+  };
+
+  // Extract unique cities and categories
   const cities = ['all', ...new Set(suppliers.map(s => s.city).filter(c => c))];
+  const categories = ['all', ...new Set(suppliers.map(s => s.product).filter(c => c))];
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch =
       supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.product.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCity = selectedCity === 'all' || supplier.city === selectedCity;
-    return matchesSearch && matchesCity;
+    const matchesCategory = selectedCategory === 'all' || supplier.product === selectedCategory;
+
+    return matchesSearch && matchesCity && matchesCategory;
+  }).sort((a, b) => {
+    // Sort favorites first
+    const aFav = favorites.includes(a.id);
+    const bFav = favorites.includes(b.id);
+    if (aFav && !bFav) return -1;
+    if (!aFav && bFav) return 1;
+    return 0;
   });
 
   const handleOrderClick = (supplier: Supplier) => {
@@ -84,10 +122,12 @@ function App() {
       <header className="bg-slate-950 border-b border-white/10 shadow-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-DEFAULT p-2 rounded-lg">
-                <ShoppingCart className="w-8 h-8 text-white" />
-              </div>
+            <div className="flex items-center gap-4">
+              <img
+                src="/logo.png"
+                alt="Vigi Câmeras"
+                className="h-12 w-auto object-contain drop-shadow-md"
+              />
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-white">VIGI Controle</h1>
                 <p className="text-royal-text text-sm font-medium opacity-60">Gestão de Fornecedores</p>
@@ -114,22 +154,45 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Filters */}
-        <div className="mb-8 flex overflow-x-auto pb-4 gap-2 no-scrollbar">
-          {cities.map(city => (
-            <button
-              key={city}
-              onClick={() => setSelectedCity(city)}
-              className={`
-                px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
-                ${selectedCity === city
-                  ? 'bg-royal-DEFAULT text-white shadow-lg shadow-royal-DEFAULT/20 transform scale-105'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-white/5'}
-              `}
-            >
-              {city === 'all' ? 'Todas as Cidades' : city}
-            </button>
-          ))}
+        {/* Filters Section */}
+        <div className="space-y-4 mb-8">
+          {/* City Filters */}
+          <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider self-center mr-2">Cidades:</span>
+            {cities.map(city => (
+              <button
+                key={city}
+                onClick={() => setSelectedCity(city)}
+                className={`
+                            px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
+                            ${selectedCity === city
+                    ? 'bg-royal-DEFAULT text-white shadow-lg shadow-royal-DEFAULT/20 transform scale-105'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-white/5'}
+                        `}
+              >
+                {city === 'all' ? 'Todas' : city}
+              </button>
+            ))}
+          </div>
+
+          {/* Category Filters */}
+          <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider self-center mr-2">Categorias:</span>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`
+                            px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
+                            ${selectedCategory === cat
+                    ? 'bg-orange-DEFAULT text-white shadow-lg shadow-orange-DEFAULT/20 transform scale-105'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-white/5'}
+                        `}
+              >
+                {cat === 'all' ? 'Todas' : cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Suppliers Grid */}
@@ -137,10 +200,22 @@ function App() {
           {filteredSuppliers.map((supplier) => (
             <div
               key={supplier.id}
-              className="bg-slate-800 rounded-xl shadow-lg border border-white/5 overflow-hidden hover:shadow-2xl hover:border-white/10 transition-all duration-300 group"
+              className={`bg-slate-800 rounded-xl shadow-lg border overflow-hidden hover:shadow-2xl transition-all duration-300 group
+                ${favorites.includes(supplier.id) ? 'border-orange-500/30 ring-1 ring-orange-500/20' : 'border-white/5 hover:border-white/10'}
+              `}
             >
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
+              <div className="p-6 relative">
+                {/* Favorite Button */}
+                <button
+                  onClick={(e) => toggleFavorite(supplier.id, e)}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors z-10"
+                >
+                  <Heart
+                    className={`w-6 h-6 transition-colors ${favorites.includes(supplier.id) ? 'fill-orange-500 text-orange-500' : 'text-slate-600'}`}
+                  />
+                </button>
+
+                <div className="flex justify-between items-start mb-4 pr-10">
                   <div className="flex items-center gap-3">
                     <div className="bg-royal-DEFAULT/20 p-2 rounded-lg group-hover:bg-royal-DEFAULT/30 transition-colors">
                       <Building2 className="w-6 h-6 text-blue-400" />
