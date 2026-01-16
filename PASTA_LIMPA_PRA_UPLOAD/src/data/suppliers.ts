@@ -35,7 +35,9 @@ export const suppliers: Supplier[] = [
             'CENTRAL ANM24 NET',
             'SENSOR IVP 5001 PET',
             'SENSOR MAGNÉTICO DE ABERTURA',
-            'CABO DE ALARME'
+            'CABO DE ALARME',
+            'BATERIA 12V 7AM',
+            'SIRENE PARA ALARME'
         ]
     },
     {
@@ -49,7 +51,9 @@ export const suppliers: Supplier[] = [
             'CENTRAL ANM24 NET',
             'SENSOR IVP 5001 PET',
             'SENSOR MAGNÉTICO DE ABERTURA',
-            'CABO DE ALARME'
+            'CABO DE ALARME',
+            'BATERIA 12V 7AM',
+            'SIRENE PARA ALARME'
         ]
     },
     {
@@ -123,7 +127,9 @@ export const suppliers: Supplier[] = [
             'CENTRAL ANM24 NET',
             'SENSOR IVP 5001 PET',
             'SENSOR MAGNÉTICO DE ABERTURA',
-            'CABO DE ALARME'
+            'CABO DE ALARME',
+            'BATERIA 12V 7AM',
+            'SIRENE PARA ALARME'
         ]
     },
     {
@@ -183,7 +189,9 @@ export const suppliers: Supplier[] = [
             'CENTRAL ANM24 NET',
             'SENSOR IVP 5001 PET',
             'SENSOR MAGNÉTICO DE ABERTURA',
-            'CABO DE ALARME'
+            'CABO DE ALARME',
+            'BATERIA 12V 7AM',
+            'SIRENE PARA ALARME'
         ]
     },
     {
