@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { suppliers, Supplier } from './data/suppliers';
+import { useState, useEffect } from 'react';
+import { Supplier } from './data/suppliers';
 import { Phone, MapPin, Package, Search, Building2, ShoppingCart } from 'lucide-react';
 import { OrderModal } from './components/OrderModal';
 
@@ -7,9 +7,53 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0meRkTnIesDrj_y2PSGZ5-sn0LZmo6s3MDaEB6zRtH8KS-jZkXeekWsJmIOxaRyy2Pvt-jpgfohIe/pub?output=csv";
+
+  useEffect(() => {
+    fetch(SHEET_URL)
+      .then(response => response.text())
+      .then(csvText => {
+        const lines = csvText.split('\n');
+        // Remove header and empty lines
+        const dataRows = lines.slice(1).filter(line => line.trim() !== '');
+
+        const parsedSuppliers: Supplier[] = dataRows.map((line, index) => {
+          // Simple CSV split by comma (assuming no commas in values for now, or simple split)
+          // A better regex for CSV with quotes support: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
+          const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.trim().replace(/^"|"$/g, ''));
+
+          // Expected columns: NOME, TELEFONE, CIDADE, REGIAO, CATEGORIA, PRODUTOS
+          // Index: 0, 1, 2, 3, 4, 5
+
+          const rawProducts = columns[5] || '';
+          const productList = rawProducts
+            ? rawProducts.split(';').map(p => p.trim()).filter(p => p !== '')
+            : [];
+
+          return {
+            id: String(index + 1),
+            name: columns[0] || 'Desconhecido',
+            phone: columns[1] || '',
+            city: columns[2] || '',
+            region: columns[3] || '',
+            product: columns[4] || '', // Category
+            products: productList
+          };
+        });
+        setSuppliers(parsedSuppliers);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Erro ao carregar planilha:", error);
+        setLoading(false);
+      });
+  }, []);
 
   // Extract unique cities for filter
-  const cities = ['all', ...new Set(suppliers.map(s => s.city))];
+  const cities = ['all', ...new Set(suppliers.map(s => s.city).filter(c => c))];
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch =
@@ -22,6 +66,17 @@ function App() {
   const handleOrderClick = (supplier: Supplier) => {
     setSelectedSupplier(supplier);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl animate-pulse flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-royal-DEFAULT border-t-transparent rounded-full animate-spin"></div>
+          Carregando fornecedores...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans text-slate-100">
