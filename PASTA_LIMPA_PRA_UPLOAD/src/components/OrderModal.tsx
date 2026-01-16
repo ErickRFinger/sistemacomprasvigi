@@ -12,7 +12,8 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
     const [quantities, setQuantities] = useState<Record<string, number>>({});
 
     const getStep = (productName: string) => {
-        const bulkKeywords = ['rj45', 'miguelao', 'bnc', 'bucha', 'p4', 'cabo'];
+        // UPDATED: Only these specific keywords trigger 100x step
+        const bulkKeywords = ['rj45', 'bnc', 'bucha', 'p4', 'miguelao'];
         const pName = productName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         // Check if any keyword matches
