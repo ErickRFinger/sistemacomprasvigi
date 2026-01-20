@@ -85,6 +85,33 @@ function App() {
             product: 'Cabos',
             phone: 'https://www.mercadolivre.com.br/p/MLB29605766',
             products: ['Cabo Paralelo Duplo 2x2,5mm 100m Maxtop Instalação Elétrica']
+          },
+          {
+            id: 'demo-3',
+            name: 'Mercado Livre - Kit Poe',
+            city: 'Online',
+            region: 'Mercado Livre',
+            product: 'Conectores',
+            phone: 'https://www.mercadolivre.com.br/p/MLB37720474?pdp*filters=item*id:MLB3974262267#origin=share&sid=share&wid=MLB3974262267&action=whatsapp',
+            products: ['Kit 10 Cabo Adaptador Poe Injetor + Separador']
+          },
+          {
+            id: 'demo-4',
+            name: 'Mercado Livre - Tomadas',
+            city: 'Online',
+            region: 'Mercado Livre',
+            product: 'Materiais Diversos',
+            phone: 'https://www.mercadolivre.com.br/up/MLBU1466129880?pdp*filters=item*id:MLB4014969574#origin=share&sid=share&wid=MLB4014969574&action=whatsapp',
+            products: ['Kit Com 50 Tomadas Tripla Em Barra 10a/20a Prismatec']
+          },
+          {
+            id: 'demo-5',
+            name: 'Mercado Livre - CX Organizadora',
+            city: 'Online',
+            region: 'Mercado Livre',
+            product: 'Materiais Diversos',
+            phone: 'https://www.mercadolivre.com.br/up/MLBU1443414333?pdp*filters=item*id:MLB3354851323#origin=share&sid=share&wid=MLB3354851323&action=whatsapp',
+            products: ['20x Caixa Proteção Sobrepor Organizadora Cftv Stilus 2505']
           }
         );
 
