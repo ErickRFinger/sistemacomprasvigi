@@ -230,7 +230,7 @@ function App() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
               <img
-                src="/logo.png"
+                src="/vigi-logo.png"
                 alt="Vigi Câmeras"
                 className="h-12 w-auto object-contain drop-shadow-md"
               />
