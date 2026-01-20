@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ExternalLink } from 'lucide-react';
+
 import type { Supplier } from './data/suppliers';
 import { Phone, MapPin, Package, Search, Building2, Heart, Clock } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -305,14 +307,41 @@ function App() {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-white/5">
-                  <button
-                    onClick={() => handleOrderClick(supplier)}
-                    className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95 duration-200"
-                  >
-                    <Phone className="w-5 h-5" />
-                    Fazer Pedido
-                  </button>
+                  {supplier.phone.startsWith('http') ? (
+                    (() => {
+                      const isShopee = supplier.phone.includes('shopee') || supplier.phone.includes('shp.ee');
+                      const isML = supplier.phone.includes('mercadolivre');
+
+                      return (
+                        <a
+                          href={supplier.phone}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`w-full flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-lg transition-all shadow-lg active:scale-95 duration-200
+                            ${isShopee
+                              ? 'bg-[#EE4D2D] hover:bg-[#D03E1F] text-white hover:shadow-[#EE4D2D]/20'
+                              : isML
+                                ? 'bg-[#FFE600] hover:bg-[#E6CF00] text-[#2D3277] hover:shadow-[#FFE600]/20'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-600/20'
+                            }
+                          `}
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          {isShopee ? 'Ver na Shopee' : isML ? 'Ver no Mercado Livre' : 'Acessar Link'}
+                        </a>
+                      );
+                    })()
+                  ) : (
+                    <button
+                      onClick={() => handleOrderClick(supplier)}
+                      className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-[#25D366]/20 active:scale-95 duration-200"
+                    >
+                      <Phone className="w-5 h-5" />
+                      Fazer Pedido
+                    </button>
+                  )}
                 </div>
+
               </div>
             </div>
           ))}

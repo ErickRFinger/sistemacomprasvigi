@@ -215,5 +215,23 @@ export const suppliers: Supplier[] = [
             'CARTUCHO MIGUELAO DE CONCRETO',
             'BUCHA 6'
         ]
+    },
+    {
+        id: '17',
+        name: 'Shopee - Conector Rápido',
+        city: 'Online',
+        region: 'Shopee',
+        product: 'Conectores',
+        phone: 'https://br.shp.ee/3P7EPYE',
+        products: ['Kit 100 Conector Rápido de Emenda Fio Elétrico com Alavanca 4mm 02 vias Dupla Saída']
+    },
+    {
+        id: '18',
+        name: 'Mercado Livre - Cabo Paralelo',
+        city: 'Online',
+        region: 'Mercado Livre',
+        product: 'Cabos',
+        phone: 'https://www.mercadolivre.com.br/p/MLB29605766?pdp*filters=item*id:MLB5177435362#origin=share&sid=share&wid=MLB5177435362&action=whatsapp',
+        products: ['Cabo Paralelo Duplo 2x2,5mm 100m Maxtop Instalação Elétrica']
     }
 ];
