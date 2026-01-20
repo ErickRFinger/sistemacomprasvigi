@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { ShoppingCart, Plus, Minus, X, Send } from 'lucide-react';
-import { Supplier } from '../data/suppliers';
+import { ShoppingCart, Plus, Minus, X, Send, Search } from 'lucide-react';
+import type { Supplier } from '../data/suppliers';
+
+import { useOrderHistory } from '../hooks/useOrderHistory';
+
 
 interface OrderModalProps {
     supplier: Supplier;
@@ -10,6 +13,10 @@ interface OrderModalProps {
 export function OrderModal({ supplier, onClose }: OrderModalProps) {
     // Initialize quantities state
     const [quantities, setQuantities] = useState<Record<string, number>>({});
+    const [searchTerm, setSearchTerm] = useState('');
+    const { addOrder } = useOrderHistory();
+
+
 
     const getStep = (productName: string) => {
         // UPDATED: Only these specific keywords trigger 100x step
@@ -49,9 +56,14 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
 
         message += `\n\n*Aguardo confirmação.*`;
 
+        // Save to History
+        const totalCount = Object.values(quantities).reduce((a, b) => a + b, 0);
+        addOrder(supplier.name, items.join('\n'), totalCount);
+
         window.open(`https://wa.me/${supplier.phone}?text=${encodeURIComponent(message)}`, '_blank');
         onClose();
     };
+
 
     if (!supplier.products || supplier.products.length === 0) {
         // Fallback for suppliers without product list -> direct whatsapp
@@ -65,56 +77,81 @@ export function OrderModal({ supplier, onClose }: OrderModalProps) {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <div className="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl border border-white/10 flex flex-col">
 
-                {/* Header */}
-                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-slate-950">
-                    <div>
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-orange-DEFAULT" />
-                            Novo Pedido: <span className="text-royal-DEFAULT">{supplier.name}</span>
-                        </h2>
-                        <p className="text-slate-400 text-sm mt-1">Selecione os itens e quantidades</p>
+                <div className="p-6 border-b border-white/10 bg-slate-950 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                <ShoppingCart className="w-5 h-5 text-orange-DEFAULT" />
+                                Novo Pedido: <span className="text-royal-DEFAULT">{supplier.name}</span>
+                            </h2>
+                            <p className="text-slate-400 text-sm mt-1">Selecione os itens e quantidades</p>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
+
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input
+                            type="text"
+                            placeholder="Buscar produto..."
+                            className="w-full bg-slate-900 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-royal-DEFAULT"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
+
 
                 {/* Product List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {supplier.products.map(product => {
-                        const step = getStep(product);
-                        const qty = quantities[product] || 0;
+                    {supplier.products
+                        .filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map(product => {
 
-                        return (
-                            <div key={product} className="flex items-center justify-between bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-                                <span className="text-slate-200 font-medium">{product}</span>
+                            const qty = quantities[product] || 0;
 
-                                <div className="flex items-center gap-3 bg-slate-950 rounded-lg p-1 border border-white/10">
-                                    <button
-                                        onClick={() => updateQuantity(product, -1)}
-                                        className={`p-2 rounded-md transition-colors ${qty === 0 ? 'text-slate-600 cursor-not-allowed' : 'text-orange-DEFAULT hover:bg-white/10'}`}
-                                        disabled={qty === 0}
-                                    >
-                                        <Minus className="w-4 h-4" />
-                                    </button>
+                            return (
+                                <div key={product} className="flex items-center justify-between bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+                                    <span className="text-slate-200 font-medium">{product}</span>
 
-                                    <span className="w-12 text-center font-bold text-white tabular-nums">
-                                        {qty}
-                                    </span>
+                                    <div className="flex items-center gap-3 bg-slate-950 rounded-lg p-1 border border-white/10">
+                                        <button
+                                            onClick={() => updateQuantity(product, -1)}
+                                            className={`p-2 rounded-md transition-colors ${qty === 0 ? 'text-slate-600 cursor-not-allowed' : 'text-orange-DEFAULT hover:bg-white/10'}`}
+                                            disabled={qty === 0}
+                                        >
+                                            <Minus className="w-4 h-4" />
+                                        </button>
 
-                                    <button
-                                        onClick={() => updateQuantity(product, 1)}
-                                        className="p-2 text-green-500 hover:bg-white/10 rounded-md transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={qty === 0 ? '' : qty}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value) || 0;
+                                                setQuantities(prev => ({ ...prev, [product]: Math.max(0, val) }));
+                                            }}
+                                            className="w-16 bg-transparent text-center font-bold text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            placeholder="0"
+                                        />
+
+
+                                        <button
+                                            onClick={() => updateQuantity(product, 1)}
+                                            className="p-2 text-green-500 hover:bg-white/10 rounded-md transition-colors"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                 </div>
 
                 {/* Footer */}
