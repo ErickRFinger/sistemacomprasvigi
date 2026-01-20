@@ -55,25 +55,58 @@ function App() {
             ? rawProducts.split(';').map(p => p.trim()).filter(p => p !== '')
             : [];
 
+          // --- ROBUST PARSING STRATEGY ---
+          // Scan the row to find the Link (URL) and Name, regardless of which column they ended up in.
+          // This handles cases where data was pasted into the wrong columns (shifted).
+
+          let foundLink = '';
+          let foundName = '';
+
+          // 1. Find the Link (First column starting with http)
+          for (const col of columns) {
+            if (col.startsWith('http')) {
+              foundLink = col;
+              break;
+            }
+          }
+
+          // 2. Find the Name
+          // Priority: Column 0, then any non-empty column that isn't the link, isn't a likely category/city
+          if (columns[0] && columns[0].length > 2) {
+            foundName = columns[0];
+          } else {
+            // Fallback: look for likely name in other columns (excluding the link we found)
+            const remainingCols = columns.filter(c => c !== foundLink && c.length > 2);
+            // Heuristic: The longest remaining string is likely the name (or product description)
+            if (remainingCols.length > 0) {
+              foundName = remainingCols.reduce((a, b) => a.length > b.length ? a : b);
+            } else {
+              foundName = 'Fornecedor Desconhecido';
+            }
+          }
+
+          // 3. Extract other metadata (if in correct place, otherwise default)
           let city = columns[2] || '';
           let region = columns[3] || '';
           let category = columns[4] || '';
 
-          // Smart Defaults for Link Items (if fields are missing)
-          const phone = columns[1] || '';
-          if (phone.startsWith('http')) {
-            if (!city) city = 'Online';
-            if (!region) region = 'Internet';
-            if (!category) category = 'Diversos';
+          // Smart Defaults for Link Items
+          if (foundLink) {
+            if (!city || city === foundName) city = 'Online';
+            if (!region || region === foundName) region = 'Internet';
+            if (!category || category === foundName || category === 'Online') category = 'Diversos';
           }
+
+          // If we found a link but no phone in column 1, use the found link
+          const finalPhone = foundLink || columns[1] || '';
 
           return {
             id: String(index + 1),
-            name: columns[0] || 'Desconhecido',
-            phone: phone,
+            name: foundName,
+            phone: finalPhone,
             city: city,
             region: region,
-            product: category, // Category
+            product: category || 'Diversos',
             products: productList
           };
         });
