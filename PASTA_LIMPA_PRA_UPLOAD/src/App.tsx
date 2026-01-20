@@ -55,70 +55,34 @@ function App() {
             ? rawProducts.split(';').map(p => p.trim()).filter(p => p !== '')
             : [];
 
+          let city = columns[2] || '';
+          let region = columns[3] || '';
+          let category = columns[4] || '';
+
+          // Smart Defaults for Link Items (if fields are missing)
+          const phone = columns[1] || '';
+          if (phone.startsWith('http')) {
+            if (!city) city = 'Online';
+            if (!region) region = 'Internet';
+            if (!category) category = 'Diversos';
+          }
+
           return {
             id: String(index + 1),
             name: columns[0] || 'Desconhecido',
-            phone: columns[1] || '',
-            city: columns[2] || '',
-            region: columns[3] || '',
-            product: columns[4] || '', // Category
+            phone: phone,
+            city: city,
+            region: region,
+            product: category, // Category
             products: productList
           };
         });
-
-        // DEMO DATA INJECTION
-        parsedSuppliers.push(
-          {
-            id: 'demo-1',
-            name: 'Shopee - Conector Rápido',
-            city: 'Online',
-            region: 'Shopee',
-            product: 'Conectores',
-            phone: 'https://br.shp.ee/3P7EPYE',
-            products: ['Kit 100 Conector Rápido de Emenda Fio Elétrico com Alavanca 4mm 02 vias Dupla Saída']
-          },
-          {
-            id: 'demo-2',
-            name: 'Mercado Livre - Cabo Paralelo',
-            city: 'Online',
-            region: 'Mercado Livre',
-            product: 'Cabos',
-            phone: 'https://www.mercadolivre.com.br/p/MLB29605766',
-            products: ['Cabo Paralelo Duplo 2x2,5mm 100m Maxtop Instalação Elétrica']
-          },
-          {
-            id: 'demo-3',
-            name: 'Mercado Livre - Kit Poe',
-            city: 'Online',
-            region: 'Mercado Livre',
-            product: 'Conectores',
-            phone: 'https://www.mercadolivre.com.br/p/MLB37720474?pdp*filters=item*id:MLB3974262267#origin=share&sid=share&wid=MLB3974262267&action=whatsapp',
-            products: ['Kit 10 Cabo Adaptador Poe Injetor + Separador']
-          },
-          {
-            id: 'demo-4',
-            name: 'Mercado Livre - Tomadas',
-            city: 'Online',
-            region: 'Mercado Livre',
-            product: 'Materiais Diversos',
-            phone: 'https://www.mercadolivre.com.br/up/MLBU1466129880?pdp*filters=item*id:MLB4014969574#origin=share&sid=share&wid=MLB4014969574&action=whatsapp',
-            products: ['Kit Com 50 Tomadas Tripla Em Barra 10a/20a Prismatec']
-          },
-          {
-            id: 'demo-5',
-            name: 'Mercado Livre - CX Organizadora',
-            city: 'Online',
-            region: 'Mercado Livre',
-            product: 'Materiais Diversos',
-            phone: 'https://www.mercadolivre.com.br/up/MLBU1443414333?pdp*filters=item*id:MLB3354851323#origin=share&sid=share&wid=MLB3354851323&action=whatsapp',
-            products: ['20x Caixa Proteção Sobrepor Organizadora Cftv Stilus 2505']
-          }
-        );
 
         // Update State & Cache
         setSuppliers(parsedSuppliers);
         localStorage.setItem('vigi_cache', JSON.stringify(parsedSuppliers));
         setLoading(false);
+
       })
       .catch(error => {
         console.error("Erro ao carregar planilha:", error);
