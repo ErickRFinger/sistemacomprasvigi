@@ -66,6 +66,28 @@ function App() {
           };
         });
 
+        // DEMO DATA INJECTION
+        parsedSuppliers.push(
+          {
+            id: 'demo-1',
+            name: 'Shopee - Conector Rápido',
+            city: 'Online',
+            region: 'Shopee',
+            product: 'Conectores',
+            phone: 'https://br.shp.ee/3P7EPYE',
+            products: ['Kit 100 Conector Rápido de Emenda Fio Elétrico com Alavanca 4mm 02 vias Dupla Saída']
+          },
+          {
+            id: 'demo-2',
+            name: 'Mercado Livre - Cabo Paralelo',
+            city: 'Online',
+            region: 'Mercado Livre',
+            product: 'Cabos',
+            phone: 'https://www.mercadolivre.com.br/p/MLB29605766',
+            products: ['Cabo Paralelo Duplo 2x2,5mm 100m Maxtop Instalação Elétrica']
+          }
+        );
+
         // Update State & Cache
         setSuppliers(parsedSuppliers);
         localStorage.setItem('vigi_cache', JSON.stringify(parsedSuppliers));
