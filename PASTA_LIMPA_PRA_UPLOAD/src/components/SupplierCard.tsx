@@ -1,5 +1,6 @@
 import React from 'react';
-import { Phone, MapPin, Package, Building2, Heart, ExternalLink } from 'lucide-react';
+import { Phone, MapPin, Package, Building2, Heart, ExternalLink, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Supplier } from '../data/suppliers';
 
 interface SupplierCardProps {
@@ -15,11 +16,22 @@ export const SupplierCard: React.FC<SupplierCardProps> = ({
     onToggleFavorite,
     onOrderClick
 }) => {
+    const [copied, setCopied] = React.useState(false);
 
     // Logic to determine button type (Store Link vs WhatsApp)
     const isLink = supplier.phone.startsWith('http');
     const isShopee = isLink && (supplier.phone.includes('shopee') || supplier.phone.includes('shp.ee'));
     const isML = isLink && supplier.phone.includes('mercadolivre');
+
+    const handleCopyPhone = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(supplier.phone);
+        setCopied(true);
+        toast.success('Telefone copiado!', {
+            className: 'bg-emerald-500 text-white border-none',
+        });
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     return (
         <div
@@ -37,18 +49,30 @@ export const SupplierCard: React.FC<SupplierCardProps> = ({
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none" />
 
             <div className="p-6 relative z-10">
-                {/* Favorite Button */}
-                <button
-                    onClick={onToggleFavorite}
-                    className="absolute top-4 right-4 p-2.5 rounded-full bg-slate-900/50 hover:bg-white/10 text-slate-400 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                >
-                    <Heart
-                        className={`w-5 h-5 transition-transform duration-300 ${isFavorite ? 'fill-orange-500 text-orange-500 scale-110' : 'scale-100'}`}
-                    />
-                </button>
+
+                {/* Top Buttons: Favorite & Copy */}
+                <div className="absolute top-4 right-4 flex gap-2">
+                    {!isLink && (
+                        <button
+                            onClick={handleCopyPhone}
+                            className="p-2.5 rounded-full bg-slate-900/50 hover:bg-white/10 text-slate-400 hover:text-white transition-all duration-300 focus:outline-none"
+                            title="Copiar Telefone"
+                        >
+                            {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+                        </button>
+                    )}
+                    <button
+                        onClick={onToggleFavorite}
+                        className="p-2.5 rounded-full bg-slate-900/50 hover:bg-white/10 text-slate-400 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    >
+                        <Heart
+                            className={`w-5 h-5 transition-transform duration-300 ${isFavorite ? 'fill-orange-500 text-orange-500 scale-110' : 'scale-100'}`}
+                        />
+                    </button>
+                </div>
 
                 {/* Header: Icon & Name */}
-                <div className="flex items-start gap-4 mb-6 pr-10">
+                <div className="flex items-start gap-4 mb-6 pr-20">
                     <div className={`
             p-3 rounded-xl transition-all duration-500
             ${isShopee

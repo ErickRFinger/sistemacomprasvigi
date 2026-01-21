@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 
 import type { Supplier } from './data/suppliers';
-import { Skeleton } from './components/ui/skeleton';
+import { AppSkeleton } from './components/AppSkeleton';
 import { OrderModal } from './components/OrderModal';
 import { OrderHistoryModal } from './components/OrderHistoryModal';
 
@@ -112,11 +112,6 @@ function App() {
       });
   }, []);
 
-  const toggleFavorite = (e: React.MouseEvent) => {
-    // This function signature is tricky to pass directly if we need the ID
-    // So we'll handle it inside the map or create a wrapper
-  };
-
   const handleToggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setFavorites(prev => {
@@ -158,25 +153,7 @@ function App() {
   });
 
   if (loading) {
-    return (
-      <div className="min-h-screen font-sans text-slate-100">
-        <Header searchTerm="" onSearchChange={() => { }} onHistoryClick={() => { }} />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
-          <div className="space-y-4 mb-8">
-            <div className="flex gap-2">
-              <Skeleton className="h-10 w-24 rounded-full bg-slate-800" />
-              <Skeleton className="h-10 w-24 rounded-full bg-slate-800" />
-              <Skeleton className="h-10 w-24 rounded-full bg-slate-800" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-slate-800/50 rounded-2xl h-[300px] border border-white/5" />
-            ))}
-          </div>
-        </main>
-      </div>
-    );
+    return <AppSkeleton />;
   }
 
   return (
