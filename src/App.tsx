@@ -1,137 +1,198 @@
-import { useState } from 'react';
-import { suppliers } from './data/suppliers';
-import { Phone, MapPin, Package, Search, Building2, ShoppingCart } from 'lucide-react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, PackagePlus, Tag, ShoppingBag, Send, Calendar } from 'lucide-react';
+import './index.css';
 
-function App() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState<string>('all');
+// Lazy loading could be used here, but for simplicity we import directly for now
+import Historico from './pages/Historico';
+import NovoEnvio from './pages/NovoEnvio';
+import EditarEnvio from './pages/EditarEnvio';
+import GerenciarProdutos from './pages/GerenciarProdutos';
+import Compras from './pages/Compras';
+import EnvioClientes from './pages/EnvioClientes';
+import CalendarioViagens from './pages/CalendarioViagens';
 
-  // Extract unique cities for filter
-  const cities = ['all', ...new Set(suppliers.map(s => s.city))];
-
-  const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch =
-      supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.product.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCity = selectedCity === 'all' || supplier.city === selectedCity;
-    return matchesSearch && matchesCity;
-  });
-
-  const handleWhatsApp = (phone: string, product: string) => {
-    const message = `Olá, gostaria de fazer um pedido de ${product}.`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-  };
+function Sidebar() {
+  const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* Header */}
-      <header className="bg-royal-dark text-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-DEFAULT p-2 rounded-lg">
-                <ShoppingCart className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">VIGI Controle</h1>
-                <p className="text-royal-DEFAULT text-sm font-medium opacity-80">Gestão de Fornecedores</p>
-              </div>
-            </div>
+    <aside className="glass-panel" style={{
+      width: '280px',
+      margin: '1rem',
+      padding: '1.5rem 1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2rem'
+    }}>
+      <div style={{ padding: '0 1rem' }}>
+        <h1 style={{
+          fontSize: '1.5rem',
+          fontWeight: '700',
+          background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '0.25rem'
+        }}>
+          VIGI Câmeras
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+          Sistema de Envios
+        </p>
+      </div>
 
-            {/* Search Bar */}
-            <div className="relative w-full md:w-96">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-3 py-2 border-none rounded-lg leading-5 bg-white/10 text-white placeholder-gray-300 focus:outline-none focus:bg-white/20 focus:ring-0 sm:text-sm transition-colors"
-                placeholder="Buscar por nome ou produto..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <Link
+          to="/"
+          className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/')}
+        >
+          <LayoutDashboard size={20} />
+          Histórico
+        </Link>
+        <Link
+          to="/novo-envio"
+          className={`nav-link ${location.pathname === '/novo-envio' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/novo-envio')}
+        >
+          <PackagePlus size={20} />
+          Novo Envio
+        </Link>
+        <Link
+          to="/produtos"
+          className={`nav-link ${location.pathname === '/produtos' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/produtos')}
+        >
+          <Tag size={20} />
+          Catálogo
+        </Link>
+        
+        <div style={{ margin: '0.5rem 0', borderTop: '1px solid var(--border)', opacity: 0.5 }}></div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link
+          to="/compras"
+          className={`nav-link ${location.pathname === '/compras' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/compras')}
+        >
+          <ShoppingBag size={20} />
+          Compras
+        </Link>
+        <Link
+          to="/envio-clientes"
+          className={`nav-link ${location.pathname === '/envio-clientes' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/envio-clientes')}
+        >
+          <Send size={20} />
+          Envio Clientes
+        </Link>
+        <Link
+          to="/viagens"
+          className={`nav-link ${location.pathname === '/viagens' ? 'active' : ''}`}
+          style={navLinkStyle(location.pathname === '/viagens')}
+        >
+          <Calendar size={20} />
+          Viagens
+        </Link>
+      </nav>
 
-        {/* Filters */}
-        <div className="mb-8 flex overflow-x-auto pb-4 gap-2 no-scrollbar">
-          {cities.map(city => (
-            <button
-              key={city}
-              onClick={() => setSelectedCity(city)}
-              className={`
-                px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
-                ${selectedCity === city
-                  ? 'bg-royal-dark text-white shadow-md transform scale-105'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}
-              `}
-            >
-              {city === 'all' ? 'Todas as Cidades' : city}
-            </button>
-          ))}
-        </div>
+      <div style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center' }}>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.7 }}>
+          VIGI &copy; 2026
+        </p>
+      </div>
+    </aside>
+  );
+}
 
-        {/* Suppliers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSuppliers.map((supplier) => (
-            <div
-              key={supplier.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-royal-DEFAULT/10 p-2 rounded-lg group-hover:bg-royal-DEFAULT/20 transition-colors">
-                      <Building2 className="w-6 h-6 text-royal-dark" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{supplier.name}</h3>
-                  </div>
-                </div>
+function navLinkStyle(isActive: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 1rem',
+    borderRadius: '8px',
+    color: isActive ? 'white' : 'var(--text-secondary)',
+    textDecoration: 'none',
+    fontWeight: '500',
+    background: isActive ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+    border: `1px solid ${isActive ? 'rgba(59, 130, 246, 0.3)' : 'transparent'}`,
+    transition: 'all 0.2s ease',
+  };
+}
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Package className="w-5 h-5 text-orange-DEFAULT" />
-                    <span className="text-sm font-medium">{supplier.product}</span>
-                  </div>
+// Global styles for hovered links (in React we can write a small style block, but we have index.css. 
+// Adding hover in index.css for nav-link is cleaner. I'll just use inline styles safely for now or let CSS handle it.
 
-                  <div className="flex items-center gap-3 text-gray-500">
-                    <MapPin className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm">{supplier.city} <span className="text-gray-300">|</span> {supplier.region}</span>
-                  </div>
-                </div>
+// Legacy App removed in favor of InnerApp
 
-                <div className="mt-6 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => handleWhatsApp(supplier.phone, supplier.product)}
-                    className="w-full flex items-center justify-center gap-2 bg-orange-DEFAULT hover:bg-orange-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm hover:shadow active:scale-95 duration-200"
-                  >
-                    <Phone className="w-5 h-5" />
-                    Fazer Pedido
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+// InnerApp wrapper to safely use useLocation for the MobileNav
+function InnerApp() {
+  const location = useLocation();
+  const isActive = (path: string) => location.pathname === path;
 
-        {/* Empty State */}
-        {filteredSuppliers.length === 0 && (
-          <div className="text-center py-12">
-            <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">Nenhum fornecedor encontrado</h3>
-            <p className="text-gray-500">Tente buscar por outro termo ou cidade.</p>
-          </div>
-        )}
+  return (
+    <div className="app-container">
+      {/* Desktop Sidebar */}
+      <div className="desktop-sidebar">
+        <Sidebar />
+      </div>
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Historico />} />
+          <Route path="/novo-envio" element={<NovoEnvio />} />
+          <Route path="/editar/:id" element={<EditarEnvio />} />
+          <Route path="/produtos" element={<GerenciarProdutos />} />
+          <Route path="/compras" element={<Compras />} />
+          <Route path="/envio-clientes" element={<EnvioClientes />} />
+          <Route path="/viagens" element={<CalendarioViagens />} />
+        </Routes>
       </main>
+
+      {/* Mobile Bottom Nav Bar */}
+      <nav className="mobile-nav-bar">
+        <Link to="/" style={mobileNavStyle(isActive('/'))}>
+          <LayoutDashboard size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Início</span>
+        </Link>
+        <Link to="/novo-envio" style={mobileNavStyle(isActive('/novo-envio'))}>
+          <PackagePlus size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Filial</span>
+        </Link>
+        <Link to="/envio-clientes" style={mobileNavStyle(isActive('/envio-clientes'))}>
+          <Send size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Cliente</span>
+        </Link>
+        <Link to="/compras" style={mobileNavStyle(isActive('/compras'))}>
+          <ShoppingBag size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Compras</span>
+        </Link>
+        <Link to="/produtos" style={mobileNavStyle(isActive('/produtos'))}>
+          <Tag size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Prod</span>
+        </Link>
+        <Link to="/viagens" style={mobileNavStyle(isActive('/viagens'))}>
+          <Calendar size={24} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Viagens</span>
+        </Link>
+      </nav>
     </div>
   );
 }
 
-export default App;
+function mobileNavStyle(active: boolean): React.CSSProperties {
+  return {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem',
+    color: active ? 'var(--accent)' : 'var(--text-secondary)', textDecoration: 'none', padding: '0.5rem',
+    flex: 1, justifyContent: 'center'
+  }
+}
+
+function AppWrapper() {
+  return (
+    <BrowserRouter>
+      <InnerApp />
+    </BrowserRouter>
+  );
+}
+
+export default AppWrapper;
